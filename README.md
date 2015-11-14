@@ -1,9 +1,9 @@
 # Page Collect
-Collects paginated data, data spread over many linked pages.
+Sequentially collects paginated data, data spread over many linked pages.
 
 Abstract
 --------
-A function mainly intended to simplify data extraction and page navigation tasks for web automation, such as user scripts for browsers, where often all data of interest is not presented on a single page, but spread out (paginate) over a collection of pages.
+A function mainly intended to simplify data extraction and page navigation tasks for web automation, such as user scripts for browsers, where often all data of interest is not presented on a single page, but spread out (paginated) over a collection of pages.
 
 The function processes the current page, scans it for a link to a following page and repeats the process until the entire paginated set has been processed. Once the last page has been encountered, the data collected from each page is provided as an array to a handler function.
 
@@ -15,11 +15,11 @@ Pagination collection function
 **Returns**: A jQuery promise ("deferred") object.  
 **Arguments**:
 
-* `nextLinkSelector`: Extractor
-  This extractor is expected to return a URL (a string) signifying the next page to process. When the function returns a "falsy" value (false / null / undefined), it is treated as a signal that all pages have been processed,    causing the deferred handler will get invoked.
+* `nextLinkSelector`: Extractor  
+  This extractor is expected to return a URL (a string) signifying the next page to process. When the function returns a "falsy" value (false / null / undefined), it is treated as a signal that all pages have been processed, causing the deferred handler to get invoked.
 
-* `contentSelector`: Extractor
-  Function responsible for extracting data from the pages. If data is returned, it will be appended to the result array handed over to the promise `done` handler when there are no more pages to process.
+* `contentSelector`: Extractor  
+  Responsible for extracting data from the pages. Data returned will be appended to the result array handed over to the promise `done` handler when there are no more pages to process.
 
 _For more information on the Extractor type, see below_
 
@@ -51,7 +51,7 @@ pageCollect(function(doc) {
 
 Extractor
 ---------
-Data extraction is performed using the notion of an "extractor". An extractor takes the shape of one of two forms; A slightly extended CSS expression or a user provided function. The definition for an extractor is:
+Data extraction is performed using the notion of an "extractor". An extractor takes the shape of one of two forms; A slightly extended CSS expression or a user provided function. The definition of an extractor is:
 
     CSS expression | function(element, context)
 
@@ -84,4 +84,4 @@ For more sophisticated data extraction needs, a user provided function can also 
 * `context`
     Also provided is a function global object called 'context'. The purpose of this object is to allow sharing of state between the extractor invocations. Each time an extractor is invoked, it will be handed the same object, making it a convenient place to temporarily store information during the data extraction.
 
-    Also worth noting is that each time a new page gets processed, the context object's `url` attribute gets set to the URL of the page being processed, which might be handy information to have in certain circumstances.
+    Worth noting is that each time a new page gets processed, the context object's `url` attribute gets set to the URL of the page being processed, which might be handy information to have in certain circumstances.
