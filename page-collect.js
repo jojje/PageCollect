@@ -22,7 +22,7 @@
  * Requires jQuery 1.5+
  */
 function pageCollect(nextLinkSelector, contentSelector) {
-  var $ = typeof(jQuery) == "function" ? jQuery : typeof($) == "function" ? $ : undefined;
+  var $ = typeof(jQuery) == "function" ? jQuery : typeof($) == "function" ? $ : undefined,
       results = [],
       context = {url: window.location.href},
       deferred;
