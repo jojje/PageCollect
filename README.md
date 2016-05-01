@@ -12,7 +12,7 @@ The elements of the array handed to the handler function correspond to the data 
 Pagination collection function
 ------------------------------
 **Signature**: `pageCollect(nextLinkSelector, contentSelector)`  
-**Returns**: A jQuery promise ("deferred") object.  
+**Returns**: a Javascript Promise object.  
 **Arguments**:
 
 * `nextLinkSelector`: Extractor  
