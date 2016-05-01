@@ -67,10 +67,9 @@ function pageCollect(nextLinkSelector, contentSelector) {
   // Convert the raw HTML from an Ajax-request to a DOM object the user
   // can more easily operate on.
   function processAjaxPage(html) {
-    var div = document.createElement('div');
-    div.innerHTML = html;
-    process(div);
-    div.innerHTML = '';
+    var parser = new DOMParser(),
+        doc = parser.parseFromString(html, 'text/html')
+    process(doc);
   }
 
   // Extract content and next-link using the user-defined methods for doing
