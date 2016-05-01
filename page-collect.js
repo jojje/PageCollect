@@ -96,7 +96,7 @@ function pageCollect(nextUrlSelector, contentSelector) {
     function process(doc) {
       var url, data;
 
-      data = contentSelector(doc, context)
+      data = contentSelector ? contentSelector(doc, context) : doc
       results.push(data);
 
       url = nextUrlSelector(doc, context);
@@ -158,7 +158,7 @@ function pageCollect(nextUrlSelector, contentSelector) {
     }
 
     nextUrlSelector = normalizeSelector('nextUrlSelector', nextUrlSelector);
-    contentSelector  = normalizeSelector('contentSelector', contentSelector);
+    contentSelector  = contentSelector ? normalizeSelector('contentSelector', contentSelector) : contentSelector;
     context = {
       url: window.location.href,
       abs: absoluteUrl,

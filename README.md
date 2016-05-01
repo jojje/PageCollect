@@ -11,7 +11,7 @@ The elements of the array handed to the handler function correspond to the data 
 
 Pagination collection function
 ------------------------------
-**Signature**: `pageCollect(nextLinkSelector, contentSelector)`  
+**Signature**: `pageCollect(nextLinkSelector [, contentSelector])`  
 **Returns**: a Javascript Promise object.  
 **Arguments**:
 
@@ -20,6 +20,7 @@ Pagination collection function
 
 * `contentSelector`: Extractor  
   Responsible for extracting data from the pages. Data returned will be appended to the result array handed over to the promise `done` handler when there are no more pages to process.
+  This is an optional parameter and if not provided, will return the entire document elements for each page traversed instead of just extracted content.
 
 _For more information on the Extractor type, see below_
 
@@ -76,7 +77,7 @@ pageCollect(
 
 An extraction _function_ for the _next_ link was used as CSS selector expressions are unable to look at the content of nodes, needed at Amazon to find the Next link.
 
-Most often thought, you can find navigation links by being crafty with CSS and making assumptions about the page structure. 
+Most often though, you can find navigation links by being crafty with CSS and making assumptions about the page structure. 
 In this example we _could_ however have used a CSS search expression to reduce the typing needed even more, by assuming the _next_ navigation link was the last list item in the pager container, and some class would be different for the next-link on the last page.
 
 ````javascript
@@ -84,14 +85,22 @@ pageCollect('#askPaginationBar li.a-last a:not([disabled]) | href', '.askTeaserQ
 .then(reviews => $('.askTeaserQuestions').append(reviews))
 ````
 
+If for some reason all you need is something that fetches all the documents, and don't need or are able to perform content extraction in-line (at the time a page is fetched), then simply omit the extraction parameter.
+
+````javascript
+pageCollect(next-expression)
+.then(docs => process(docs))
+````
+
+Do note that extracting the content you need on-the-fly, by supplying an extraction parameter, requires less memory. For a handful of pages the memory saving may not be important, but if you're traversing lots of pages. It could mean the difference between a successful extraction and an out of memory browser crash.
+
 Extractor
 ---------
 Data extraction is performed using the notion of an "extractor". An extractor takes the shape of one of two forms; A slightly extended CSS expression or a user provided function. The definition of an extractor is:
 
     CSS expression | function(element, context)
 
-Extractor as a CSS selector
----------------------------
+### Extractor as a CSS selector
 When in the form of a CSS expression, the expression is applied to the entire document, just like issuing `$(expr, document)`. The _extended_ bit refers to a syntax extension used to communicate *what* to extract from matched
 elements.
 
@@ -106,8 +115,7 @@ Examples of expressions and the associated effects:
 
 Note: The attribute names _text_ and _html_ are the only ones with special meaning. Any other attribute name will result in the equivalent DOM element attribute being used for extraction. I.e. `"a|foo"` is equivalent to `$(el).attr('foo')` being performed on all elements matching the CSS filter expression (the part before the pipe character, `"a"` in this case).
 
-Extractor as a function
------------------------
+### Extractor as a function
 For more sophisticated data extraction needs, a user provided function can also be used as an extractor.
 
 **Signature**: `function(element, context)`  
