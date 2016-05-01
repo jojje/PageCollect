@@ -110,7 +110,7 @@ function pageCollect(nextUrlSelector, contentSelector) {
     // to extract on matched elements.
     function normalizeSelector(name, selector) {
       function $(expr, doc) {
-        var elems = (doc || window.document).querySelectorAll('a');
+        var elems = (doc || window.document).querySelectorAll(expr);
         return [].slice.apply(elems);
       }
 
