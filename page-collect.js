@@ -23,7 +23,7 @@
 function pageCollect(nextUrlSelector, contentSelector) {
   return new Promise(function(resolve, reject) {
     var results = [],
-        context = {url: window.location.href},
+        context,
         lastUrl = window.location.href,
         fetched = [
           document.location.href,
@@ -35,6 +35,11 @@ function pageCollect(nextUrlSelector, contentSelector) {
       if(typeof(console) != 'undefined' && console.debug) {
         console.debug.apply(console, Array.prototype.slice.call(arguments));
       }
+    }
+
+    function $(expr, doc) {
+      var elems = (doc || window.document).querySelectorAll(expr);
+      return [].slice.apply(elems);
     }
 
     function absoluteUrl(uri) {
@@ -54,7 +59,8 @@ function pageCollect(nextUrlSelector, contentSelector) {
       return new Promise(function(resolveGet, rejectGet) {
         if(fetched[url]) {
           debug("Stopping early to avoid infinite loop, since the url has already been fetched: ", url);
-          return resolveGet('<html></html>');
+          resolveResults();
+          return;
         }
         debug("fetching page: "+ url);
 
@@ -94,26 +100,25 @@ function pageCollect(nextUrlSelector, contentSelector) {
       results.push(data);
 
       url = nextUrlSelector(doc, context);
-      if(typeof(url) != "string") url = url[0];
+      if(typeof(url) == 'object') url = url[0];
 
       if(url) {
         context.url = url;
         get(url).then(processAjaxPage);
       } else {
+        resolveResults();
+      }
+    }
+
+    function resolveResults() {
         results = [].concat.apply([], results);  // flatten array
         resolve(results);
-      }
     }
 
     // Convert css selectors to function to simplify branching logic later on.
     // E.g. ".foo|bar" where '.foo' becomes the filter and 'bar' the attribute
     // to extract on matched elements.
     function normalizeSelector(name, selector) {
-      function $(expr, doc) {
-        var elems = (doc || window.document).querySelectorAll(expr);
-        return [].slice.apply(elems);
-      }
-
       function createSelectorFunction() {
         var filter, attr, m;
 
@@ -154,6 +159,12 @@ function pageCollect(nextUrlSelector, contentSelector) {
 
     nextUrlSelector = normalizeSelector('nextUrlSelector', nextUrlSelector);
     contentSelector  = normalizeSelector('contentSelector', contentSelector);
+    context = {
+      url: window.location.href,
+      abs: absoluteUrl,
+      $: $
+    }
+
     process(window.document);
   });
 }

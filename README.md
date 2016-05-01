@@ -29,10 +29,10 @@ Extract some data from all paginated pages using CSS selector expressions.
 ````javascript
 pageCollect(".nextlink | href", ".some-content | text")
 
-.done(function(items) {
+.then(function(items) {
   console.log("extracted items:", items);
 })
-.fail(function(err) {
+.catch(function(err) {
   console.error("Uh Oh, something went wrong", err);
 });
 ````
@@ -46,7 +46,42 @@ pageCollect(function(doc) {
   return $(doc).find(".some-content").text();
 })
 
-.done(...) .fail(...)
+.then(...) .catch(...)
+````
+
+A real example; Fetch and join all reviews on a product page at amazon.com and add them to the review section of the displayed product page, using the new and handy ECMA script 6 short-hand function declaration.
+
+````javascript
+pageCollect(
+  (doc, context) =>
+    context.$('#askPaginationBar li a', doc)
+    .filter(el => el.textContent.match(/Next/))
+    .map(el => el.getAttribute('href'))[0],
+  '.askTeaserQuestions > .a-fixed-left-grid'
+).then(reviews =>
+  reviews.forEach(review => document.querySelector('.askTeaserQuestions').appendChild(review))
+)
+````
+
+The same example but, with jQuery also loaded on the page, would decrease the typing a bit.
+
+````javascript
+pageCollect(
+  doc => $('#askPaginationBar li a:contains(Next)', doc).attr('href'),
+  '.askTeaserQuestions > .a-fixed-left-grid'
+).then(reviews =>
+  $('.askTeaserQuestions').append(reviews)
+)
+````
+
+An extraction _function_ for the _next_ link was used as CSS selector expressions are unable to look at the content of nodes, needed at Amazon to find the Next link.
+
+Most often thought, you can find navigation links by being crafty with CSS and making assumptions about the page structure. 
+In this example we _could_ however have used a CSS search expression to reduce the typing needed even more, by assuming the _next_ navigation link was the last list item in the pager container, and some class would be different for the next-link on the last page.
+
+````javascript
+pageCollect('#askPaginationBar li.a-last a:not([disabled]) | href', '.askTeaserQuestions > .a-fixed-left-grid')
+.then(reviews => $('.askTeaserQuestions').append(reviews))
 ````
 
 Extractor
@@ -78,10 +113,16 @@ For more sophisticated data extraction needs, a user provided function can also 
 **Signature**: `function(element, context)`  
 **Arguments**:
 
-* `element`
+* `document`
     The function will be handed a DOM element containing the page elements. Regard this element as the page root node (e.g. document or something similar during background / ajax fetching and collation).
 
 * `context`
-    Also provided is a function global object called 'context'. The purpose of this object is to allow sharing of state between the extractor invocations. Each time an extractor is invoked, it will be handed the same object, making it a convenient place to temporarily store information during the data extraction.
+    Holds state between the extractor invocations. Each time an extractor is invoked, it will be handed the same object, making it a convenient place to temporarily store information during the data extraction.
 
-    Worth noting is that each time a new page gets processed, the context object's `url` attribute gets set to the URL of the page being processed, which might be handy information to have in certain circumstances.
+    Each time a new page gets processed, the context's `url` attribute gets set to the URL of the page being processed, which might be handy information to have in certain circumstances.
+
+    A couple of helper functions are defined on the context object:  
+    
+	- `url` the current url being processed
+	- `abs` a function that takes a string and makes an absolute URL out of it. Given the current url being processed is `http://example.com/foo`, calling `context.abs('bar')` will yield the result `http://example.com/foo/bar`.
+	- `$` short hand for document.querySelectorAll, but with the css selection result converted into a proper array, so that array operations can be used to process the mached elements.
