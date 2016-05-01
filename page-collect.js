@@ -25,6 +25,7 @@ function pageCollect(nextUrlSelector, contentSelector) {
   var $ = typeof(jQuery) == "function" ? jQuery : typeof($) == "function" ? $ : undefined,
       results = [],
       context = {url: window.location.href},
+      fetched = [],
       deferred;
 
   (function assertPreReqsSatisfied() {
@@ -48,6 +49,11 @@ function pageCollect(nextUrlSelector, contentSelector) {
   // Ordinary jquery get, except for stripping the X-Requested-With header,
   // since some sites behave strangely when that header is set.
   function get(url) {
+    if(fetched[url]) {
+      debug("Stopping early to avoid infinite loop, since the url has already been fetched: ", url);
+      return $.Deferred().resolve('<html></html>');
+    }
+    fetched[url] = true;
     debug("fetching page: "+ url);
     return $.ajax({
       method: 'GET',
@@ -94,7 +100,7 @@ function pageCollect(nextUrlSelector, contentSelector) {
 
     if(url) {
       context.url = url;
-      get(url).success(processAjaxPage).fail(function(xhr, kind, msg){
+      get(url).done(processAjaxPage).fail(function(xhr, kind, msg){
         error({type: kind, reason: msg});
       });
     } else {
