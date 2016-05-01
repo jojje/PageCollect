@@ -21,7 +21,7 @@
  * Refer to the README for specification and usage examples.
  * Requires jQuery 1.5+
  */
-function pageCollect(nextLinkSelector, contentSelector) {
+function pageCollect(nextUrlSelector, contentSelector) {
   var $ = typeof(jQuery) == "function" ? jQuery : typeof($) == "function" ? $ : undefined,
       results = [],
       context = {url: window.location.href},
@@ -86,7 +86,7 @@ function pageCollect(nextLinkSelector, contentSelector) {
     }
 
     try {
-      url = nextLinkSelector(doc, context);
+      url = nextUrlSelector(doc, context);
       if(typeof(url) != "string") url = url[0];
     } catch(err){
       error(err);
@@ -146,7 +146,7 @@ function pageCollect(nextLinkSelector, contentSelector) {
   }
 
   deferred = $.Deferred();
-  nextLinkSelector = normalizeSelector('nextLinkSelector', nextLinkSelector);
+  nextUrlSelector = normalizeSelector('nextUrlSelector', nextUrlSelector);
   contentSelector  = normalizeSelector('contentSelector', contentSelector);
   process(window.document);
   return deferred.promise();
